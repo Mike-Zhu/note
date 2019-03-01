@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>edit-distance-test</title>
+    <style>
+        .wrap{
+            width:600px;
+            margin:0 auto;
+        }
+        .inline{
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>edit-distance-test</h1>
+        <div class="inline">
+            <input type="text" placeholder="请输入..." />
+            <button onClick="search">确定</button>
+        </div>
+        <div class="display" style="display:none">
+            您是不是想要输入<span></span>
+        </div>
+    </div>
+
+</body>
+<script>
+    function minDistance(word1, word2) {
+        var len1 = word1.length
+        var len2 = word2.length
+        var d = Array.from({ length: len2 + 1 })
+            .map(
+                () => Array.from({ length: len1 + 1 })
+            )
+        for (var i = 0; i < len2 + 1; i++) {
+            d[i][0] = i
+        }
+        for (var j = 0; j < len1 + 1; j++) {
+            d[0][j] = j
+        }
+        for (var i = 1; i < len2 + 1; i++) {
+            for (var j = 1; j < len1 + 1; j++) {
+                let prev = d[i - 1][j - 1]
+                let cont = word2[i - 1] === word1[j - 1] ? 0 : 1
+                d[i][j] = Math.min(
+                    d[i - 1][j] + 1,
+                    d[i][j - 1] + 1,
+                    prev + cont,
+                )
+            }
+        }
+        return d[len2][len1]
+    };
+    var keywordList = [
+        'git pull',
+        'git push',
+        'git status',
+        'git merge',
+        'git rebase',
+        'git reset',
+        'git abort'
+    ]
+    function search(e) {
+        var input = document.querySelector('input')
+        var value = input.value
+        var index = keywordList.indexOf(value)
+        var display = document.querySelector('.display')
+
+        if (index >= 0) {
+            display.style.display = 'none'
+        } else {
+            display.style.display = 'block'
+        }
+        var distanceList = keywordList.map(function (key) {
+            return {
+                key: key,
+                distance: minDistance(key, value)
+            }
+        })
+        var mostLikely = distanceList.sort((left, right) => left.distance - right.distance)[0].key
+        display.querySelector('span').innerHTML = mostLikely
+    }
+    document.querySelector('button').addEventListener('click', search)
+</script>
+
+</html>
